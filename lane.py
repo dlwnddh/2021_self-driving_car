@@ -23,7 +23,7 @@ class lidar_receiver:
         self.lidar_sub = rospy.Subscriber("/zed/zed_node/rgb/image_rect_color", Image, self.callback)
         self.stop_pub = rospy.Publisher("/check", Float32, queue_size = 5)
         self.lineangle_pub = rospy.Publisher("/lineangle", Float32, queue_size = 5)
-        self.drive_pub = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/input/nav_1", AckermannDriveStamped,)
+        self.drive_pub = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/input/nav_1", AckermannDriveStamped,queue_size = 5)
         self.cvbridge = Cvbridge()
 
     def callback(self, data):

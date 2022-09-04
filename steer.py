@@ -20,7 +20,7 @@ class lidar_receiver:
         self.msg_sub = rospy.Subscriber("/tflag", String, self.callback3)
         self.lineangle2_sub = rospy.Subscriber("/lineangle2", Float32, self.callbasck4)
         self.lc_sub = rospy.Subscriber("/lc_marker", Float32, self.callback5)
-        self.drive_pub = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/input/nav_1", AckermannDriveStamped,)
+        self.drive_pub = rospy.Publisher("/vesc/high_level/ackermann_cmd_mux/input/nav_1", AckermannDriveStamped, queue_size = 5)
         self.cvbridge = Cvbridge()
 
     def callback(self, data):
