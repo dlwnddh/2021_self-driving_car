@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# 라인트레이싱 기본 코드
 
 from array import array
 import rospy
@@ -7,10 +8,11 @@ from ackermann_msgs.msg import AckermannDriveStamped
 from std_msgs.msg import Float32
 from cv_bridge import Cvbridge
 import cv2
-import numpy as np
+import numpy as np  # 배열 연산 편리성 제공
 import matplotlib.pyplot as plt
 import math
 
+# 영상 분할 및 좌표 추정을 위한 배열 생성
 dot1_x = [0 for i in range(8)]
 dot1_y = [0 for i in range(8)]
 dot2_x = [0 for i in range(8)]
@@ -27,25 +29,33 @@ class lidar_receiver:
         self.cvbridge = Cvbridge()
 
     def callback(self, data):
+        # cv 영상 받아오기
         frame1 = self.cvbridge.imgmsg_to_cv2(data, "bgr8")
 
         val = 30
         array = np.full(frame1.shape, (val, val, val), dtype=np.uint8)
         frame = cv2.subtract(frame, array)
+
+        # 영상 원근 변환을 진행할 점 좌표 설정
+        # pts1 : 변환 전 좌표
+        # pts2 : 변환 후 좌표
         pts1 = np.float32([[160, 300], [560, 300], [700, 400], [40, 400]])
         pts2 = np.float32([[0, 0], [640, 0], [640, 480], [0, 480]])
         for i in pts1:
             pass
+            # 변환 전의 4개의 좌표를 circle로 표시
             cv2.circle(frame, tuple(i), 5, (255, 255, 0), -1)
-        M = cv2.getPerspectiveTransform(pts1, pts2)
-        inv_M = cv2.getPerspectiveTransform(pts2, pts1)
-        BEV = cv2.warpPerspective(frame, M, (640, 480))
-        hsv = cv2.cvtColor(BEV, cv2.COLOR_BGR2HSV)
+        M = cv2.getPerspectiveTransform(pts1, pts2)     # 원근 변환 행렬을 M에 저장
+        BEV = cv2.warpPerspective(frame, M, (640, 480)) # 원근 변환 실행
+        hsv = cv2.cvtColor(BEV, cv2.COLOR_BGR2HSV)      # 영상 색상을 HSV 방식으로 변환
+        
+        # 영상의 특정 색상 영역만 추출하기 위해 색상 영역의 최소/최대 설정
         lower_th = np.array([23, 100, 100])
         higher_th = np.array([90, 255, 255])
-        mask = cv2.inRange(hsv, lower_th, higher_th)
-        res = cv2.bitwise_and(BEV, BEV, mask = mask)
-        edges = cv2.Canny(mask, 200, 400)
+
+        mask = cv2.inRange(hsv, lower_th, higher_th)    # 특정 색상 영역 추출
+        res = cv2.bitwise_and(BEV, BEV, mask = mask)    # mask 영역에서 겹치는 부분(and)만 추출
+        edges = cv2.Canny(mask, 200, 400)               # mask 영역에서 edge 추출
 
         #cv2.circle(frame, (320, 240), 20, (255, 0, 0), -1)
         #cv2.imshow("frame", frame)
