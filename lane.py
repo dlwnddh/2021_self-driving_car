@@ -79,26 +79,28 @@ class lidar_receiver:
                     x0 = 0
 
                 roi = mask[y0:y0 + h0, x0:x0+w0]
-                # 라인이 인식되는 범위를 
+                # 라인이 인식되는 범위를 탐색
                 contours, _ = cv2.findContours(roi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
                 #ROI = cv2.drawContours(BEV, countours, -1, (0, 255, 0), 2)
 
+                # 인식된 구역의 윤곽(면적)이 기준 값보다 크면 윤곽을 나타내는 사각형 생성
                 for contour in contours:
                     if cv2.contourArea(contour) < 700:
                         continue
                 
-                (x, y, w, h) = cv2.boundingRect(contour)
-                cv2.rectangle(BEV, (x + w / 2 - 50 + x0, x + h / 2 - 20 + y0), (x + w / 2 + 50 + x0, x + h / 2 + 20 + y0), (0, 0, 255), 0)
+                    (x, y, w, h) = cv2.boundingRect(contour)
+                    cv2.rectangle(BEV, (x + w / 2 - 50 + x0, x + h / 2 - 20 + y0), (x + w / 2 + 50 + x0, x + h / 2 + 20 + y0), (0, 0, 255), 0)
 
-                xx = x + w / 2
-                yy = y + h / 2 + y0
-                
-                if x0 == 0:
-                    dot1_x[i] = xx
-                    dot1_y[i] = yy
-                else:
-                    dot2_x[i] = xx
-                    dot2_y[i] = yy
+                    xx = x + w / 2
+                    yy = y + h / 2 + y0
+                    
+                    if x0 == 0:
+                        dot1_x[i] = xx
+                        dot1_y[i] = yy
+                    else:
+                        dot2_x[i] = xx
+                        dot2_y[i] = yy
+
             y0 += 50
             if i == 7:
                 y0 = 0
@@ -117,6 +119,8 @@ class lidar_receiver:
         cv2.line(BEV, (dot1_x[7], dot1_y[7]), (dot1_x[0], dot1_y[0]), (255, 0, 0), 3)
         cv2.line(BEV, (x_line2 + 320, dot2_y[7]), (dot2_x[0] + 320, dot2_y[0]), (255, 0, 0), 3)
 
+        # 라인의 기울기 계산
+        # 만약 라인이 수직일 경우, 기울기 값은 0으로 설정
         if (dot1_x[7] - dot1_x[0]) == 0:
             slope1 = 0
         else:
@@ -131,6 +135,7 @@ class lidar_receiver:
         # print("---------------------")
         # print(dot2_x)
 
+        # 라인의 기울기에 따른 바퀴의 조향각 
         if (680 - dot2_x[0]) > 585:
             angle = 0.4
         else:
