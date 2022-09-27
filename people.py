@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# 전방 동적 장애물 인식 프로세스 (LiDAR)
 
 import rospy
 from sensor_msgs.msg import LaserScan

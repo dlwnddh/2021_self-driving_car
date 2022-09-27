@@ -42,7 +42,6 @@ class lidar_receiver:
         pts1 = np.float32([[160, 300], [560, 300], [700, 400], [40, 400]])
         pts2 = np.float32([[0, 0], [640, 0], [640, 480], [0, 480]])
         for i in pts1:
-            pass
             # 변환 전의 4개의 좌표를 circle로 표시
             cv2.circle(frame, tuple(i), 5, (255, 255, 0), -1)
         M = cv2.getPerspectiveTransform(pts1, pts2)     # 원근 변환 행렬을 M에 저장
@@ -72,13 +71,15 @@ class lidar_receiver:
         y0 = 0
 
         i = 0
-
+        
+        # 좌우 라인 모두 탐색하여 라인이 인식되는 구역을 사각형으로 표시
         for j in range(2):
             for i in range(8):
                 if (i == 0) & (x0 == 680):
                     x0 = 0
 
                 roi = mask[y0:y0 + h0, x0:x0+w0]
+                # 라인이 인식되는 범위를 
                 contours, _ = cv2.findContours(roi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
                 #ROI = cv2.drawContours(BEV, countours, -1, (0, 255, 0), 2)
 
@@ -106,11 +107,13 @@ class lidar_receiver:
 
         x_line1 = 0
 
+        # 좌회전 시, 최상단의 라인이 카메라 범위에서 벗어나면, 특정 값으로 고정
         if dot2_x[7] > 161:
             x_line2 = dot2_x[7]
         else:
             x_line2 = 161
         
+        # 좌우 라인 모두 직선 생성
         cv2.line(BEV, (dot1_x[7], dot1_y[7]), (dot1_x[0], dot1_y[0]), (255, 0, 0), 3)
         cv2.line(BEV, (x_line2 + 320, dot2_y[7]), (dot2_x[0] + 320, dot2_y[0]), (255, 0, 0), 3)
 
